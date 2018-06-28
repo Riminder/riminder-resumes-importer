@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-"""Don't look at me I'm scared :(."""
+"""Uploads resume on riminder platform."""
 import random
 import threading
 import argparse
@@ -20,24 +20,32 @@ VERBOSE_LEVEL_VERBOSE = 'verbose'
 
 
 class Upload_result(object):
+    """Container for upload result."""
+
     def __init__(self):
+        """Init."""
         self.is_success = False
         self.result = None
         self.file = None
 
     def setFailure(self, err, file):
+        """Set the object with a failed upload."""
         self.is_success = False
         self.result = err
         self.file = file
 
     def setSuccess(self, resp, file):
+        """Set the object with a succeed upload."""
         self.is_success = True
         self.result = resp
         self.file = file
 
 
 class Upload_worker(threading.Thread):
+    """Worker for that manage upload."""
+
     def __init__(self, worker_id, api, source_id, timestamp_reception):
+        """Init."""
         threading.Thread.__init__(self)
         self.file_to_process = None
         self.callback = None
@@ -47,21 +55,27 @@ class Upload_worker(threading.Thread):
         self.worker_id = worker_id
 
     def set_file(self, file, cb):
+        """Add a for next upload."""
         self.file_to_process = file
         self.callback = cb
 
     def process_file(self):
+        """Upload file and notify supervisor."""
         res = send_file(self.api, self.source_id, self.file_to_process, self.timestamp_reception)
         self.file_to_process = None
         self.callback(self.worker_id, res)
 
     def run(self):
+        """Upload file until no file is place by callback."""
         while self.file_to_process is not None:
             self.process_file()
 
 
-class UploadSupervisior(object):
+class UploadSupervisor(object):
+    """Manage upload, worker, and logging."""
+
     def __init__(self, cml_args, files):
+        """Init using command args datas and files to upload."""
         self.api = riminder.Riminder(cml_args.api_key)
         self.paths = files
         self.is_recurcive = cml_args.r
@@ -94,6 +108,7 @@ class UploadSupervisior(object):
             self._set_worker_file(i)
 
     def worker_callback(self, workerID, file_result):
+        """Callback function used by workers to notify when file has been sended."""
         self.lock_worker.acquire()
         self.results.append(file_result)
         if not file_result.is_success:
@@ -104,6 +119,7 @@ class UploadSupervisior(object):
         self.lock_worker.release()
 
     def start(self):
+        """Start process."""
         self.print_start()
         self._init_workers()
         self.lock_worker.acquire()
@@ -169,6 +185,7 @@ class UploadSupervisior(object):
         return to_print
 
     def print_something(self, to_print, is_err=False, is_no_end=False):
+        """Print on term."""
         self.lock_printer.acquire()
         out = sys.stdout
         end = '\n'
@@ -180,6 +197,7 @@ class UploadSupervisior(object):
         self.lock_printer.release()
 
     def print_start(self):
+        """Print data a start."""
         if self.v_level == VERBOSE_LEVEL_SILENT:
             return
         to_print = ''
@@ -190,6 +208,7 @@ class UploadSupervisior(object):
         self.print_something(to_print)
 
     def print_update(self, last_file_result):
+        """Print data when a file has been sent."""
         if self.v_level == VERBOSE_LEVEL_SILENT:
             return
         to_print = ''
@@ -205,6 +224,7 @@ class UploadSupervisior(object):
             self.logfile.write(to_print)
 
     def print_end(self):
+        """Print data when all process is done."""
         if self.v_level == VERBOSE_LEVEL_SILENT:
             return
         to_print = ''
@@ -226,6 +246,7 @@ class UploadSupervisior(object):
 
 
 def parse_args():
+    """Parse command line argument."""
     argsParser = argparse.ArgumentParser(description='Send resume to the platform.')
     argsParser.add_argument('--paths', nargs='*', required=True)
     argsParser.add_argument('-r', action='store_const', const=True, default=False)
@@ -241,6 +262,7 @@ def parse_args():
 
 
 def is_valid_extension(file_path):
+    """Check if an file extension is valid."""
     ext = os.path.splitext(file_path)[1]
     if not ext:
         return False
@@ -248,11 +270,13 @@ def is_valid_extension(file_path):
 
 
 def is_valid_filename(file_path):
+    """Check if a filename is valid."""
     name = os.path.basename(file_path)
     return name not in INVALID_FILENAME
 
 
 def get_files_from_dir(dir_path, is_recurcive):
+    """Get all filepath from a given directory."""
     file_res = []
     files_path = os.listdir(dir_path)
 
@@ -268,6 +292,7 @@ def get_files_from_dir(dir_path, is_recurcive):
 
 
 def get_filepaths_to_send(paths, is_recurcive):
+    """Get all file path from a list of file and dirs."""
     res = []
     for fpath in paths:
         if not is_valid_filename(fpath):
@@ -282,6 +307,7 @@ def get_filepaths_to_send(paths, is_recurcive):
 
 
 def send_file(api_client, source_id, file_path, timestamp_reception):
+    """Send a resume using riminder python api."""
     res = Upload_result()
     try:
         resp = api_client.profile.add(source_id=source_id,
@@ -298,5 +324,5 @@ def send_file(api_client, source_id, file_path, timestamp_reception):
 
 args = parse_args()
 paths = get_filepaths_to_send(args.paths, args.r)
-supervisor = UploadSupervisior(args, paths)
+supervisor = UploadSupervisor(args, paths)
 supervisor.start()
