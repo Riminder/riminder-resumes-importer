@@ -10,7 +10,7 @@ import time
 
 import riminder
 
-VALID_EXTENSIONS = ['.pdf', '.png', '.jpg', '.jpeg', '.bmp', '.doc', '.docx', '.rtf', '.dotx', '.odt', 'odp', 'ppt', 'pptx', 'rtf', 'msg']
+VALID_EXTENSIONS = ['.pdf', '.png', '.jpg', '.jpeg', '.bmp', '.doc', '.docx', '.rtf', '.dotx', '.odt', '.odp', '.ppt', '.pptx', '.rtf', '.msg']
 INVALID_FILENAME = ['.', '..']
 SIZE_PROGRESS_BAR = 50
 
