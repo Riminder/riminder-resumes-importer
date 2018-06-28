@@ -79,6 +79,9 @@ class UploadSupervisior(object):
         self.results = []
         self.n_failed = 0
         self.n_file_to_send = len(self.paths)
+        self.logfile = None
+        if cml_args.logfile is not None:
+            self.logfile = open(cml_args.logfile, mode='w')
 
     def _set_worker_file(self, workerID):
         if len(self.paths) == 0:
@@ -193,11 +196,13 @@ class UploadSupervisior(object):
         if self.v_level == VERBOSE_LEVEL_NORMAL:
             to_print = self._print_update_progress_bar()
             self.print_something(to_print, is_no_end=True)
-            return
         if self.v_level == VERBOSE_LEVEL_VERBOSE:
             to_print = self._print_finished_file(last_file_result)
             to_print = to_print[:-1]
-        self.print_something(to_print)
+            self.print_something(to_print)
+        if self.logfile is not None and last_file_result is not None:
+            to_print = self._print_finished_file(last_file_result, add_percentage=False)
+            self.logfile.write(to_print)
 
     def print_end(self):
         if self.v_level == VERBOSE_LEVEL_SILENT:
@@ -230,6 +235,7 @@ def parse_args():
     argsParser.add_argument('--verbose', action='store_const', const=True, default=False)
     argsParser.add_argument('--silent', action='store_const', const=True, default=False)
     argsParser.add_argument('--n-worker', default=3)
+    argsParser.add_argument('--logfile', default=None, required=False)
     args = argsParser.parse_args()
     return args
 
