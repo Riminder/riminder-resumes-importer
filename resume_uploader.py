@@ -14,6 +14,10 @@ VALID_EXTENSIONS = ['.pdf', '.png', '.jpg', '.doc', '.docx', '.rtf', '.dotx']
 INVALID_FILENAME = ['.', '..']
 SIZE_PROGRESS_BAR = 30
 
+VERBOSE_LEVEL_SILENT = 'silent'
+VERBOSE_LEVEL_NORMAL = 'normal'
+VERBOSE_LEVEL_VERBOSE = 'verbose'
+
 
 class Upload_result(object):
     def __init__(self):
@@ -49,7 +53,6 @@ class Upload_worker(threading.Thread):
     def process_file(self):
         res = send_file(self.api, self.source_id, self.file_to_process, self.timestamp_reception)
         self.file_to_process = None
-        time.sleep(0.5)
         self.callback(self.worker_id, res)
 
     def run(self):
@@ -63,7 +66,11 @@ class UploadSupervisior(object):
         self.paths = files
         self.is_recurcive = cml_args.r
         self.source_id = cml_args.source_id
-        self.v_level = cml_args.verbose_level
+        self.v_level = VERBOSE_LEVEL_NORMAL
+        if args.silent:
+            self.v_level = VERBOSE_LEVEL_SILENT
+        if args.verbose:
+            self.v_level = VERBOSE_LEVEL_VERBOSE
         self.n_worker = cml_args.n_worker
         self.timestamp_reception = cml_args.timestamp_reception
         self.workers = {}
@@ -96,8 +103,13 @@ class UploadSupervisior(object):
     def start(self):
         self.print_start()
         self._init_workers()
+        self.lock_worker.acquire()
+        if self.v_level == VERBOSE_LEVEL_NORMAL:
+            self.print_update(None)
         for idx, w in enumerate(self.workers):
             self.workers[idx].start()
+            time.sleep(0.1)
+        self.lock_worker.release()
 
         for idx, w in enumerate(self.workers):
             self.workers[idx].join()
@@ -165,41 +177,41 @@ class UploadSupervisior(object):
         self.lock_printer.release()
 
     def print_start(self):
-        if self.v_level == 'silent':
+        if self.v_level == VERBOSE_LEVEL_SILENT:
             return
         to_print = ''
-        if self.v_level != 'silent':
+        if self.v_level != VERBOSE_LEVEL_SILENT:
             to_print = 'file to send: {}'.format(self._print_numerical_datas(n_total=True))
-        if self.v_level == 'verbose':
+        if self.v_level == VERBOSE_LEVEL_VERBOSE:
             to_print += self._print_all_file_to_send()
         self.print_something(to_print)
 
     def print_update(self, last_file_result):
-        if self.v_level == 'silent':
+        if self.v_level == VERBOSE_LEVEL_SILENT:
             return
         to_print = ''
-        if self.v_level == 'normal':
+        if self.v_level == VERBOSE_LEVEL_NORMAL:
             to_print = self._print_update_progress_bar()
             self.print_something(to_print, is_no_end=True)
             return
-        if self.v_level == 'verbose':
+        if self.v_level == VERBOSE_LEVEL_VERBOSE:
             to_print = self._print_finished_file(last_file_result)
             to_print = to_print[:-1]
         self.print_something(to_print)
 
     def print_end(self):
-        if self.v_level == 'silent':
+        if self.v_level == VERBOSE_LEVEL_SILENT:
             return
         to_print = ''
         to_print_file = ''
-        if self.v_level == 'verbose':
+        if self.v_level == VERBOSE_LEVEL_VERBOSE:
             for res in self.results:
                 to_print_file += self._print_finished_file(res, add_percentage=False)
             to_print += self._print_numerical_datas(n_total=True, n_sended=True, n_failed=True)
             self.print_something(to_print_file, is_err=True)
             self.print_something(to_print)
             return
-        if self.v_level == 'normal':
+        if self.v_level == VERBOSE_LEVEL_NORMAL:
             for res in self.results:
                 if not res.is_success:
                     to_print_file += self._print_finished_file(res, add_percentage=False)
@@ -215,7 +227,8 @@ def parse_args():
     argsParser.add_argument('--source_id', required=True)
     argsParser.add_argument('--api_key', required=True)
     argsParser.add_argument('--timestamp_reception', default=None)
-    argsParser.add_argument('--verbose-level', default='normal',  choices=['normal', 'silent', 'verbose'])
+    argsParser.add_argument('--verbose', action='store_const', const=True, default=False)
+    argsParser.add_argument('--silent', action='store_const', const=True, default=False)
     argsParser.add_argument('--n-worker', default=3)
     args = argsParser.parse_args()
     return args
@@ -258,14 +271,14 @@ def get_filepaths_to_send(paths, is_recurcive):
             continue
         if not is_valid_extension(fpath):
             continue
-        res += fpath
+        res.append(fpath)
     return res
 
 
 def send_file(api_client, source_id, file_path, timestamp_reception):
     res = Upload_result()
     try:
-        resp = api_client.post_profile(source_id=source_id,
+        resp = api_client.profile.add(source_id=source_id,
             file_path=file_path,
             timestamp_reception=timestamp_reception)
         if resp['code'] != 200 and resp['code'] != 201:
