@@ -250,8 +250,8 @@ def parse_args():
     argsParser = argparse.ArgumentParser(description='Send resume to the platform.')
     argsParser.add_argument('--paths', nargs='*', required=True)
     argsParser.add_argument('-r', action='store_const', const=True, default=False)
-    argsParser.add_argument('--source_id', required=True)
-    argsParser.add_argument('--api_key', required=True)
+    argsParser.add_argument('--source_id', default=None)
+    argsParser.add_argument('--api_key', default=None)
     argsParser.add_argument('--timestamp_reception', default=None)
     argsParser.add_argument('--verbose', action='store_const', const=True, default=False)
     argsParser.add_argument('--silent', action='store_const', const=True, default=False)
@@ -322,7 +322,25 @@ def send_file(api_client, source_id, file_path, timestamp_reception):
     return res
 
 
+def get_from_stdin(message):
+    """Prompt a message and wait for user input."""
+    print(message, end='', flush=True)
+    res = sys.stdin.readline()
+    res = res[:-1]
+    return res
+
+
+def get_user_data(args):
+    """Get command line missing datas."""
+    if args.api_key is None:
+        args.api_key = get_from_stdin('api secret key: ')
+    if args.source_id is None:
+        args.source_id = get_from_stdin('source id: ')
+    return args
+
+
 args = parse_args()
+args = get_user_data(args)
 paths = get_filepaths_to_send(args.paths, args.r)
 supervisor = UploadSupervisor(args, paths)
 supervisor.start()
