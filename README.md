@@ -1,0 +1,1 @@
+# Riminder's resume importer
