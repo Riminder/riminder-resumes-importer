@@ -88,11 +88,17 @@ def get_user_data(args):
     return args
 
 
-# Prepare upload
-args = parse_args()
-args = get_user_data(args)
-paths = get_filepaths_to_send(args.paths, args.r)
+def main():
+    """Well..."""
+    # Prepare upload
+    args = parse_args()
+    args = get_user_data(args)
+    paths = get_filepaths_to_send(args.paths, args.r)
 
-# Start upload.
-supervisor = Upload_supervisor.UploadSupervisor(args, paths)
-supervisor.start()
+    # Start upload.
+    supervisor = Upload_supervisor.UploadSupervisor(args, paths)
+    supervisor.start()
+
+
+if __name__ == '__main__':
+    main()
