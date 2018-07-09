@@ -8,8 +8,9 @@ import json
 import sys
 import time
 
-from Upload_worker import Upload_worker
 import riminder
+
+from resume_importer import Upload_worker
 
 VALID_EXTENSIONS = ['.pdf', '.png', '.jpg', '.jpeg', '.bmp', '.doc', '.docx', '.rtf', '.dotx', '.odt', '.odp', '.ppt', '.pptx', '.rtf', '.msg']
 INVALID_FILENAME = ['.', '..']
@@ -54,7 +55,7 @@ class UploadSupervisor(object):
 
     def _init_workers(self):
         for i in range(self.n_worker):
-            self.workers[i] = Upload_worker(i, self.api, self.source_id, self.timestamp_reception)
+            self.workers[i] = Upload_worker.Upload_worker(i, self.api, self.source_id, self.timestamp_reception)
             # Give a file before start a worker to avoid the workers to die instantly
             self._set_worker_file(i)
 

@@ -3,3 +3,9 @@ e
 lol
 zap
 asset
+__pycache__
+deploy
+resume_importer.egg-info
+riminder_resume_importer.egg-info
+build
+dist

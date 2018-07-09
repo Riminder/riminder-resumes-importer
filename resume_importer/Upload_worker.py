@@ -2,7 +2,7 @@
 
 import threading
 
-from Upload_result import Upload_result
+from resume_importer import Upload_result
 
 
 class Upload_worker(threading.Thread):
@@ -37,7 +37,7 @@ class Upload_worker(threading.Thread):
 
 def _send_file(api_client, source_id, file_path, timestamp_reception):
     """Send a resume using riminder python api and put result in an Upload_result object."""
-    res = Upload_result()
+    res = Upload_result.Upload_result()
     try:
         resp = api_client.profile.add(source_id=source_id,
             file_path=file_path,

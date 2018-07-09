@@ -4,7 +4,7 @@ import argparse
 import os
 import sys
 
-import Upload_supervisor
+from resume_importer import Upload_supervisor
 
 
 def parse_args():
