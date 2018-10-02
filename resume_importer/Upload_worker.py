@@ -5,7 +5,7 @@ import threading
 from shutil import copy
 
 from resume_importer import Upload_result
-from resume_importer.Upload_supervisor import FOLDER_FAILED_RESUMES
+from resume_importer.Upload_supervisor import FOLDER_NAME_FAILED_RESUMES
 
 
 class Upload_worker(threading.Thread):
@@ -59,4 +59,5 @@ def _send_file(api_client, source_id, file_path, timestamp_reception, can_move_t
 
 def _copy_fail_folder(file_path, can_move_to_fail_folder):
     if can_move_to_fail_folder:
-        copy(file_path, FOLDER_FAILED_RESUMES)
+        folder_failed_resumes = os.path.join(os.getcwd(), FOLDER_NAME_FAILED_RESUMES)
+        copy(file_path, folder_failed_resumes)
