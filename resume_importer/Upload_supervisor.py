@@ -2,6 +2,7 @@
 # Upload supervisor is the class that orchestrate all the upload process
 # Also, it's resposible for all the pretty outputs
 
+import os, errno
 import random
 import threading
 import json
@@ -19,6 +20,8 @@ SIZE_PROGRESS_BAR = 50
 VERBOSE_LEVEL_SILENT = 'silent'
 VERBOSE_LEVEL_NORMAL = 'normal'
 VERBOSE_LEVEL_VERBOSE = 'verbose'
+
+FOLDER_FAILED_RESUMES = "failed-resumes"
 
 
 class UploadSupervisor(object):
@@ -46,6 +49,15 @@ class UploadSupervisor(object):
         self.logfile = None
         if cml_args.logfile is not None:
             self.logfile = open(cml_args.logfile, mode='w')
+        self.can_move_to_fail_folder = True
+        if not os.path.exists(os.path.join(os.getcwd(), FOLDER_FAILED_RESUMES)):
+            try:
+                os.makedirs(os.path.join(os.getcwd(), FOLDER_FAILED_RESUMES))
+            except OSError as e:
+                if e.errno != errno.EEXIST:
+                    self.can_move_to_fail_folder = False
+            except Exception as e:
+                self.can_move_to_fail_folder = False
 
     def _set_worker_file(self, workerID):
         if len(self.paths) == 0:
@@ -55,7 +67,7 @@ class UploadSupervisor(object):
 
     def _init_workers(self):
         for i in range(self.n_worker):
-            self.workers[i] = Upload_worker.Upload_worker(i, self.api, self.source_id, self.timestamp_reception)
+            self.workers[i] = Upload_worker.Upload_worker(i, self.api, self.source_id, self.timestamp_reception, self.can_move_to_fail_folder)
             # Give a file before start a worker to avoid the workers to die instantly
             self._set_worker_file(i)
 
