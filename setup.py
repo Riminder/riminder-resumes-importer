@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='riminder_resume_importer',
-      version='0.0.2',
+      version='0.0.3',
       description='Riminder resume importer.',
       url='https://github.com/Riminder/riminder-resumes-importer',
       author='riminder',
