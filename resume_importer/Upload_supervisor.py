@@ -49,7 +49,7 @@ class UploadSupervisor(object):
         self.logfile = None
         if cml_args.logfile is not None:
             self.logfile = open(cml_args.logfile, mode='w')
-        self.can_move_to_fail_folder = self._create_failed_folder()
+        self.can_move_to_fail_folder, self.fail_folder_path = self._create_failed_folder()
 
     def _set_worker_file(self, workerID):
         if len(self.paths) == 0:
@@ -59,7 +59,7 @@ class UploadSupervisor(object):
 
     def _init_workers(self):
         for i in range(self.n_worker):
-            self.workers[i] = Upload_worker.Upload_worker(i, self.api, self.source_id, self.timestamp_reception, self.can_move_to_fail_folder)
+            self.workers[i] = Upload_worker.Upload_worker(i, self.api, self.source_id, self.timestamp_reception, self.can_move_to_fail_folder, self.fail_folder_path)
             # Give a file before start a worker to avoid the workers to die instantly
             self._set_worker_file(i)
 
@@ -101,11 +101,11 @@ class UploadSupervisor(object):
             except OSError as e:
                 if e.errno != errno.EEXIST:
                     self.print_something('Warning: will not be able to copy failed files to the {} directory'.format(FOLDER_NAME_FAILED_RESUMES))
-                    return False
+                    return False, ''
             except Exception as e:
                 self.print_something('Warning: will not be able to copy failed files to the {} directory'.format(FOLDER_NAME_FAILED_RESUMES))
-                return False
-        return True
+                return False, ''
+        return True, folder_failed_resumes
 
     # _print_* functions don't actually print they just prepare a string that will be print after
     def _print_update_progress_bar(self):
