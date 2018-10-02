@@ -59,5 +59,4 @@ def _send_file(api_client, source_id, file_path, timestamp_reception, can_move_t
 
 def _copy_fail_folder(file_path, can_move_to_fail_folder):
     if can_move_to_fail_folder:
-        dst = os.path.join(os.getcwd(), FOLDER_FAILED_RESUMES)
-        copy(file_path, dst)
+        copy(file_path, FOLDER_FAILED_RESUMES)

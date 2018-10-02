@@ -21,7 +21,8 @@ VERBOSE_LEVEL_SILENT = 'silent'
 VERBOSE_LEVEL_NORMAL = 'normal'
 VERBOSE_LEVEL_VERBOSE = 'verbose'
 
-FOLDER_FAILED_RESUMES = "failed-resumes"
+FOLDER_NAME_FAILED_RESUMES = "failed-resumes"
+FOLDER_FAILED_RESUMES = os.path.join(os.getcwd(), FOLDER_NAME_FAILED_RESUMES)
 
 
 class UploadSupervisor(object):
@@ -50,9 +51,9 @@ class UploadSupervisor(object):
         if cml_args.logfile is not None:
             self.logfile = open(cml_args.logfile, mode='w')
         self.can_move_to_fail_folder = True
-        if not os.path.exists(os.path.join(os.getcwd(), FOLDER_FAILED_RESUMES)):
+        if not os.path.exists(FOLDER_FAILED_RESUMES):
             try:
-                os.makedirs(os.path.join(os.getcwd(), FOLDER_FAILED_RESUMES))
+                os.makedirs(FOLDER_FAILED_RESUMES)
             except OSError as e:
                 if e.errno != errno.EEXIST:
                     self.can_move_to_fail_folder = False
