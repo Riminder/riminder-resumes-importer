@@ -61,11 +61,13 @@ def get_filepaths_to_send(paths, is_recurcive):
     res = []
     for fpath in paths:
         if not is_valid_filename(fpath):
+            print('Not a valid filename: \n'.format(fpath))
             continue
         if os.path.isdir(fpath):
             res += get_files_from_dir(fpath, is_recurcive)
             continue
         if not is_valid_extension(fpath):
+            print('Not a valid extension: \n'.format(fpath))
             continue
         res.append(fpath)
     return res
