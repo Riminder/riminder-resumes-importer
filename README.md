@@ -2,7 +2,7 @@
 
 ## usage
 ```sh
-resume_importer [-h] --paths [PATHS [PATHS ...]] [-r]
+resumeImporter [-h] --paths [PATHS [PATHS ...]] [-r]
                           [--source_id SOURCE_ID] [--api_key API_KEY]
                           [--timestamp_reception TIMESTAMP_RECEPTION]
                           [--verbose] [--silent] [--n-worker N_WORKER]
@@ -10,7 +10,7 @@ resume_importer [-h] --paths [PATHS [PATHS ...]] [-r]
 ```
 
 ## description
-  resume_importer uploads resume to riminder's platform. The selected resume are selected using the paths argument and can be a directory or just a file.
+  resume_importer uploads resume to Riminder's platform. The resumes are selected using the paths argument and can be a directory or just a file. In case a profile does not get sent, a folder named `failed-resumes` will be created in the current directory with a copy of the failed files.
 
 ## options
 * --paths path/to/target/file/or/directory1 path/to/target/file/or/directory2 ... path/to/target/file/or/directoryn
