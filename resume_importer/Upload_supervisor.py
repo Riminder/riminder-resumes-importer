@@ -2,6 +2,7 @@
 # Upload supervisor is the class that orchestrate all the upload process
 # Also, it's resposible for all the pretty outputs
 
+import os, errno
 import random
 import threading
 import json
@@ -12,13 +13,15 @@ import riminder
 
 from resume_importer import Upload_worker
 
-VALID_EXTENSIONS = ['.pdf', '.png', '.jpg', '.jpeg', '.bmp', '.doc', '.docx', '.rtf', '.dotx', '.odt', '.odp', '.ppt', '.pptx', '.rtf', '.msg']
+VALID_EXTENSIONS = ['.pdf', '.PNG', '.png', '.jpg', '.jpeg', '.bmp', '.doc', '.docx', '.rtf', '.dotx', '.odt', '.odp', '.ppt', '.pptx', '.rtf', '.msg']
 INVALID_FILENAME = ['.', '..']
 SIZE_PROGRESS_BAR = 50
 
 VERBOSE_LEVEL_SILENT = 'silent'
 VERBOSE_LEVEL_NORMAL = 'normal'
 VERBOSE_LEVEL_VERBOSE = 'verbose'
+
+FOLDER_NAME_FAILED_RESUMES = "failed-resumes"
 
 
 class UploadSupervisor(object):
@@ -46,6 +49,7 @@ class UploadSupervisor(object):
         self.logfile = None
         if cml_args.logfile is not None:
             self.logfile = open(cml_args.logfile, mode='w')
+        self.can_move_to_fail_folder, self.fail_folder_path = self._create_failed_folder()
 
     def _set_worker_file(self, workerID):
         if len(self.paths) == 0:
@@ -55,7 +59,7 @@ class UploadSupervisor(object):
 
     def _init_workers(self):
         for i in range(self.n_worker):
-            self.workers[i] = Upload_worker.Upload_worker(i, self.api, self.source_id, self.timestamp_reception)
+            self.workers[i] = Upload_worker.Upload_worker(i, self.api, self.source_id, self.timestamp_reception, self.can_move_to_fail_folder, self.fail_folder_path)
             # Give a file before start a worker to avoid the workers to die instantly
             self._set_worker_file(i)
 
@@ -88,6 +92,20 @@ class UploadSupervisor(object):
 
     def _calc_percentage_processed(self, on=100):
         return int((len(self.results) * on) / self.n_file_to_send)
+
+    def _create_failed_folder(self):
+        folder_failed_resumes = os.path.join(os.getcwd(), FOLDER_NAME_FAILED_RESUMES)
+        if not os.path.exists(folder_failed_resumes):
+            try:
+                os.makedirs(folder_failed_resumes)
+            except OSError as e:
+                if e.errno != errno.EEXIST:
+                    self.print_something('Warning: will not be able to copy failed files to the {} directory'.format(FOLDER_NAME_FAILED_RESUMES))
+                    return False, ''
+            except Exception as e:
+                self.print_something('Warning: will not be able to copy failed files to the {} directory'.format(FOLDER_NAME_FAILED_RESUMES))
+                return False, ''
+        return True, folder_failed_resumes
 
     # _print_* functions don't actually print they just prepare a string that will be print after
     def _print_update_progress_bar(self):

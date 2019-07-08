@@ -9,3 +9,4 @@ resume_importer.egg-info
 riminder_resume_importer.egg-info
 build
 dist
+.vscode
