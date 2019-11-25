@@ -8,7 +8,7 @@ setup(name='riminder_resume_importer',
       author_email='contact@rimider.net',
       license='MIT',
       install_requires=[
-          'riminder==1.0.4'
+          'riminder'
       ],
       packages=['resume_importer'],
       entry_points={

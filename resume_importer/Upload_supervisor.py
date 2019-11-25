@@ -29,7 +29,7 @@ class UploadSupervisor(object):
 
     def __init__(self, cml_args, files):
         """Init using command args datas and files to upload."""
-        self.api = riminder.Riminder(cml_args.api_key)
+        self.api = riminder.Riminder(cml_args.api_key, None, cml_args.api_url)
         self.paths = files
         self.is_recurcive = cml_args.r
         self.source_id = cml_args.source_id
