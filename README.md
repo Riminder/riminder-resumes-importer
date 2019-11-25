@@ -3,7 +3,7 @@
 ## usage
 ```sh
 resume_importer [-h] --paths [PATHS [PATHS ...]] [-r]
-                          [--source_id SOURCE_ID] [--api_key API_KEY]
+                          [--source_id SOURCE_ID] [--api_key API_KEY][--api_url API_URL]
                           [--timestamp_reception TIMESTAMP_RECEPTION]
                           [--verbose] [--silent] [--n-worker N_WORKER]
                           [--logfile LOGFILE]
@@ -24,6 +24,9 @@ resume_importer [-h] --paths [PATHS [PATHS ...]] [-r]
 * --api_key api_secret_key
   * Your api secret, available on your riminder platform.
   * Will be asked if absent.
+* --api_url api_url
+  * The url for the riminder api
+  * **Default** "https://www.riminder.net/sf/public/api/v1.0/"
 * --verbose
   * Enable verbose mode
 * --silent
