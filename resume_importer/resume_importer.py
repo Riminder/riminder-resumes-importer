@@ -14,6 +14,7 @@ def parse_args():
     argsParser.add_argument('-r', action='store_const', const=True, default=False)
     argsParser.add_argument('--source_id', default=None)
     argsParser.add_argument('--api_key', default=None)
+    argsParser.add_argument('--api_url', default="https://www.riminder.net/sf/public/api/v1.0/")
     argsParser.add_argument('--timestamp_reception', default=None)
     argsParser.add_argument('--verbose', action='store_const', const=True, default=False)
     argsParser.add_argument('--silent', action='store_const', const=True, default=False)
