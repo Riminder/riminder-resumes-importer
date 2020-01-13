@@ -2,10 +2,10 @@
 
 ## usage
 ```sh
-resume_importer [-h] --paths [PATHS [PATHS ...]] [-r]
+resumeImporter [-h] --paths [PATHS [PATHS ...]] [-r]
                           [--source_id SOURCE_ID] [--api_key API_KEY][--api_url API_URL]
                           [--timestamp_reception TIMESTAMP_RECEPTION]
-                          [--verbose] [--silent] [--n-worker N_WORKER]
+                          [--verbose] [--silent] [--n-worker N_WORKER] [--sleep SLEEP]
                           [--logfile LOGFILE]
 ```
 
@@ -34,6 +34,9 @@ resume_importer [-h] --paths [PATHS [PATHS ...]] [-r]
 * --n-worker n
   * Select the number of worker (thread) you want to use.
   * **Default**: 3
+* --sleep n
+  *  Number of seconds between each file upload.
+  * **Default**: 0
 * --logfile path/to/file
   * Select a file where export logs will be logged
 * --timestamp_reception timestamp

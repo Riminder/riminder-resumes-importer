@@ -33,6 +33,7 @@ class UploadSupervisor(object):
         self.paths = files
         self.is_recurcive = cml_args.r
         self.source_id = cml_args.source_id
+        self.sleep = int(cml_args.sleep)
         self.v_level = VERBOSE_LEVEL_NORMAL
         if cml_args.silent:
             self.v_level = VERBOSE_LEVEL_SILENT
@@ -56,7 +57,8 @@ class UploadSupervisor(object):
             return
         # pop a file for the stack and give it to a worker (to avoid upload duplication)
         self.workers[workerID].set_file(self.paths.pop(), self.worker_callback)
-
+        time.sleep(self.sleep)
+        
     def _init_workers(self):
         for i in range(self.n_worker):
             self.workers[i] = Upload_worker.Upload_worker(i, self.api, self.source_id, self.timestamp_reception, self.can_move_to_fail_folder, self.fail_folder_path)
